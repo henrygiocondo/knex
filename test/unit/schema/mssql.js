@@ -46,6 +46,18 @@ describe("MSSQL SchemaBuilder", function() {
     equal(1, tableSql.length);
     expect(tableSql[0].sql).to.equal("if object_id('[users]', 'U') is not null DROP TABLE [users]");
   });
+  
+  it('test create table if not exists', function() {
+    tableSql = client.schemaBuilder().createTableIfNotExists('users', function(table) {
+      table.increments('id');
+      table.string('email');
+      table.charset('utf8');
+      table.collate('utf8_unicode_ci');
+    });
+
+    equal(1, tableSql.toSQL().length);
+    expect(tableSql.toSQL()[0].sql).to.equal('if object_id('[users]', 'U') is null CREATE TABLE [users] ([id] int identity(1,1) not null primary key, [email] nvarchar(255))');
+  });
 
   it('test drop column', function() {
     tableSql = client.schemaBuilder().table('users', function() {
